@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, setContext } from "svelte"
+  import { quintOut } from "svelte/easing"
   import { writable } from "svelte/store"
+  import { fly } from "svelte/transition"
 
   export let onClose: () => void
 
@@ -31,6 +33,7 @@
 
   let extensionElement: HTMLElement
   let isDragging = false
+  let isHovering = false
   let showDots = false
   let startY: number
   let side: "left" | "right"
@@ -57,13 +60,16 @@
     }
   }
 
+  let dragStartTime: number
+  const CLICK_THRESHOLD = 80 // milliseconds
+
   function startDragging(e: MouseEvent | TouchEvent) {
     isDragging = true
+    dragStartTime = Date.now()
     let rect = extensionElement.getBoundingClientRect()
     startY =
       (e instanceof MouseEvent ? e.clientY : e.touches[0].clientY) - rect.top
     document.body.style.userSelect = "none"
-    document.body.style.cursor = "grabbing"
     addHighlight()
   }
 
@@ -157,26 +163,19 @@
     if (extensionElement) {
       if (isExpanded) {
         extensionElement.style.transform = `translate(0, ${expandedPosition.top}px)`
-        extensionElement.style.left =
-          $position.side === "left"
-            ? `${expandedPosition[$position.side]}px`
-            : "auto"
-        extensionElement.style.right =
-          $position.side === "right"
-            ? `${expandedPosition[$position.side]}px`
-            : "auto"
+        extensionElement.style.left = $position.side === "left" ? "0" : "auto"
+        extensionElement.style.right = $position.side === "right" ? "0" : "auto"
       } else {
         extensionElement.style.transform = `translate(0, ${$position.top}px)`
-        extensionElement.style.left =
-          $position.side === "left" ? "20px" : "auto"
-        extensionElement.style.right =
-          $position.side === "right" ? "20px" : "auto"
+        extensionElement.style.left = $position.side === "left" ? "0" : "auto"
+        extensionElement.style.right = $position.side === "right" ? "0" : "auto"
       }
     }
   }
 
   function closeExtension() {
     isExpanded = false
+    isHovered = false // Reset hover state when closing
     const savedPreviousPosition = JSON.parse(
       localStorage.getItem("previousPosition")
     )
@@ -254,50 +253,70 @@
     dragHorizontal(e)
   }
 
+  function handleClick(e: MouseEvent) {
+    const dragDuration = Date.now() - dragStartTime
+    if (dragDuration < CLICK_THRESHOLD) {
+      toggleExpand()
+    }
+  }
+
   $: side = $position.side
+
+  let isHovered = false
 </script>
 
 <div
   bind:this={extensionElement}
   class="extension {isExpanded ? 'expanded' : ''} {$position.side}"
   class:visible={isVisible}
-  on:mouseenter={() => (showDots = true)}
-  on:mouseleave={() => (showDots = false)}
+  class:dragging={isDragging}
+  on:mouseenter={() => (isHovered = true)}
+  on:mouseleave={() => (isHovered = false)}
   role="button"
   tabindex="0"
   aria-label="Draggable extension">
   {#if !isExpanded}
-    <div class="icon-container">
+    <div class="icon-container bg-[#3777FF] rounded-lg shadow-lg">
       <button
-        class="icon"
+        class="icon flex items-center justify-between w-full h-full px-2 py-2"
+        class:flex-row-reverse={$position.side === "left"}
         on:mousedown={startDragging}
         on:touchstart={startDragging}
-        on:click={toggleExpand}
+        on:mouseup={stopDragging}
+        on:touchend={stopDragging}
+        on:click={handleClick}
         aria-label="Toggle extension"
         aria-expanded={isExpanded}>
-        {#if showDots}
-          <div class="dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-          </div>
-        {/if}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           width="24"
           height="24"
-          class="fill-current">
+          class="fill-white"
+          transform={$position.side === "left"
+            ? "scale(-1, 1)"
+            : "scale(1, 1)"}>
           <path fill="none" d="M0 0h24v24H0z" />
           <path
-            d="M3 3h18v18H3V3zm16 16V5H5v14h14zM11 7h2v2h-2V7zm0 4h2v2h-2V7zm0 4h2v2h-2v-2z" />
+            d="M3 3h18v18H3V3zm16 16V5H5v14h14zM11 7h2v2h-2V7zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" />
         </svg>
+        {#if isHovered && !isExpanded}
+          <div class="dots-container">
+            <div class="dots">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+        {/if}
       </button>
       <button
-        class="close-btn btn btn-circle btn-xs"
+        class="close-btn btn btn-circle btn-xs absolute -top-1 bg-white text-[#3777FF] border-[#3777FF] hover:bg-[#3777FF] hover:text-white"
+        class:-left-1={$position.side === "right"}
+        class:-right-1={$position.side === "left"}
         on:click={handleCloseClick}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -325,11 +344,8 @@
     position: fixed;
     top: 0;
     transform: translateY(50vh);
-    width: 40px;
-    height: 40px;
-    background-color: var(--base-100);
-    border-radius: 50%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 56px;
+    height: 56px;
     z-index: 9999;
     will-change: transform;
     opacity: 0;
@@ -341,14 +357,16 @@
     pointer-events: auto;
   }
 
+  .extension:hover {
+    width: 80px;
+  }
+
   .extension.left {
-    left: 20px;
-    right: auto;
+    left: 0;
   }
 
   .extension.right {
-    right: 20px;
-    left: auto;
+    right: 0;
   }
 
   .extension.expanded {
@@ -360,37 +378,65 @@
     overflow: hidden;
   }
 
-  .icon {
+  .icon-container {
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .icon {
+    cursor: pointer;
+  }
+
+  .icon:active {
+    cursor: pointer;
+  }
+
+  .dots-container {
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: none;
-    border: none;
     cursor: grab;
+    transform: rotate(90deg);
     position: relative;
   }
 
-  .dots {
+  .dots-container:hover {
+    cursor: grab;
+  }
+
+  .dots-container:hover::after {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 2px;
-    padding: 8px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.1);
+    right: 0;
+    bottom: 0;
+  }
+
+  .extension.dragging,
+  .extension.dragging .icon-container,
+  .extension.dragging .icon,
+  .extension.dragging .dots-container {
+    cursor: grabbing !important;
+  }
+
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    width: 18px;
+    height: 18px;
   }
 
   .dot {
     width: 4px;
     height: 4px;
-    background-color: var(--base-content);
+    background-color: white;
     border-radius: 50%;
+    margin: 1px;
   }
 
   .content {
@@ -398,47 +444,7 @@
     height: 100%;
   }
 
-  .extension:active {
-    cursor: grabbing;
-  }
-
-  :global(.extension) .card {
-    background-color: transparent !important;
-    box-shadow: none !important;
-  }
-
-  :global(.extension) .card-body {
-    padding: 0 !important;
-  }
-
-  :global(.extension) .file-input {
-    border-color: #4b5563;
-    background-color: #374151;
-    color: #e2e8f0;
-  }
-
-  :global(.extension) .btn-primary {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
-  }
-
-  :global(.extension) .btn-primary:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
-  }
-
-  .icon-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-
   .close-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background-color: var(--base-100);
-    border: 1px solid var(--base-content);
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
   }
@@ -447,7 +453,11 @@
     opacity: 1;
   }
 
-  .close-btn:hover {
-    background-color: var(--base-200);
+  .extension.left .icon-container {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .extension.right .icon-container {
+    border-radius: 8px 0 0 8px;
   }
 </style>
