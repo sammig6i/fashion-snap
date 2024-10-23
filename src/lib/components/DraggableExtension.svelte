@@ -4,6 +4,8 @@
   import { writable } from "svelte/store"
   import { fly } from "svelte/transition"
 
+  import Logo from "~lib/assets/logo.svelte"
+
   export let onClose: () => void
 
   let isVisible = true
@@ -61,7 +63,7 @@
   }
 
   let dragStartTime: number
-  const CLICK_THRESHOLD = 80 // milliseconds
+  const CLICK_THRESHOLD = 200 // milliseconds
 
   function startDragging(e: MouseEvent | TouchEvent) {
     isDragging = true
@@ -287,19 +289,7 @@
         on:click={handleClick}
         aria-label="Toggle extension"
         aria-expanded={isExpanded}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          class="fill-white"
-          transform={$position.side === "left"
-            ? "scale(-1, 1)"
-            : "scale(1, 1)"}>
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            d="M3 3h18v18H3V3zm16 16V5H5v14h14zM11 7h2v2h-2V7zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" />
-        </svg>
+        <Logo />
         {#if isHovered && !isExpanded}
           <div class="dots-container">
             <div class="dots">
