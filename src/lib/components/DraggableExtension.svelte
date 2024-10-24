@@ -1,10 +1,9 @@
 <script lang="ts">
+  import Logo from "data-base64:~/lib/assets/logo.png"
   import { createEventDispatcher, onMount, setContext } from "svelte"
   import { quintOut } from "svelte/easing"
   import { writable } from "svelte/store"
   import { fly } from "svelte/transition"
-
-  import Logo from "~lib/assets/logo.svelte"
 
   export let onClose: () => void
 
@@ -63,7 +62,7 @@
   }
 
   let dragStartTime: number
-  const CLICK_THRESHOLD = 200 // milliseconds
+  const CLICK_THRESHOLD = 200
 
   function startDragging(e: MouseEvent | TouchEvent) {
     isDragging = true
@@ -289,7 +288,9 @@
         on:click={handleClick}
         aria-label="Toggle extension"
         aria-expanded={isExpanded}>
-        <Logo />
+        <div>
+          <img width="48" height="48" src={Logo} alt="Extension logo" />
+        </div>
         {#if isHovered && !isExpanded}
           <div class="dots-container">
             <div class="dots">
@@ -373,10 +374,18 @@
     height: 100%;
     box-sizing: border-box;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .icon {
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
   }
 
   .icon:active {
