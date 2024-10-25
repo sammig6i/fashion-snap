@@ -48,10 +48,10 @@
 </script>
 
 <div
-  class="card card-compact shadow-xl flex-grow"
+  class="card bg-base-100 w-96 shadow-xl"
   class:bg-base-200={theme === "light"}
   class:bg-base-300={theme === "dark"}>
-  <div class="card-body p-4 overflow-y-auto">
+  <div class="card-body items-center text-center">
     <input
       type="file"
       class="file-input file-input-bordered file-input-secondary w-full"

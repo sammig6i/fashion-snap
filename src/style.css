@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :host {
     --text: #000000;
   }
   [data-theme="dark"] {

@@ -67,7 +67,12 @@ async def store_user_image(file: UploadFile = File(...)):
     raise HTTPException(status_code=500, detail=f"An error occurred while storing the user image: {str(e)}")
 
 
-# TODO - add inference logic with filtered images for Virtual Try-On Model
+"""
+# TODO - update with Virtual Try-On inference logic for the filtered images
+1. Work with the user's selected garment image and their full-body picture
+"""
+
+
 @app.post("/try_on")
 async def try_on(garment_image: str = Form(...), user_image: UploadFile = File(...)):
   tryon_dir = "tryon_images"

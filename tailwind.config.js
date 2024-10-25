@@ -4,11 +4,6 @@ module.exports = {
   darkMode: "class",
   content: [
     "./src/**/*.{html,js,svelte,ts}",
-    "./src/contents/**/*.{html,js,svelte,ts}"
-  ],
-  plugins: [
-    require("@tailwindcss/typography"),
-    require("daisyui"),
   ],
   daisyui: {
     themes: [
@@ -76,5 +71,5 @@ module.exports = {
       },
     }),
   },
-
 }
+

@@ -3,7 +3,9 @@
 
   import { onMount } from "svelte"
 
+  import { filteredImages } from "~/background/storage"
   import ImageUploader from "~/lib/components/ImageUploader.svelte"
+  import ImageDisplay from "~lib/components/ImageDisplay.svelte"
   import ThemeSwitcher from "~lib/components/ThemeSwitcher.svelte"
 
   let theme: "light" | "dark" = "light"
@@ -43,4 +45,5 @@
     onThemeChange={handleThemeChange}
     onClose={closeExtension} />
   <ImageUploader {theme} />
+  <ImageDisplay {theme} images={$filteredImages} />
 </div>

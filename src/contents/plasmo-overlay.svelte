@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<!-- <script context="module" lang="ts">
   import "./plasmo-overlay.css"
 
   import cssText from "data-text:~/contents/plasmo-overlay.css"
@@ -10,15 +10,11 @@
   export const config: PlasmoCSConfig = {
     matches: ["<all_urls>"]
   }
-
   export const getStyle = () => {
     const style = document.createElement("style")
     style.textContent = cssText
     return style
   }
-</script>
-
-<script lang="ts">
   let isActive = true
 
   function closeExtension() {
@@ -30,4 +26,4 @@
   <DraggableExtension onClose={closeExtension}>
     <Popup />
   </DraggableExtension>
-{/if}
+{/if} -->

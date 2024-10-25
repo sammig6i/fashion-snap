@@ -265,7 +265,6 @@
 
   let isHovered = false
 </script>
-
 <div
   bind:this={extensionElement}
   class="extension {isExpanded ? 'expanded' : ''} {$position.side}"
@@ -289,7 +288,12 @@
         aria-label="Toggle extension"
         aria-expanded={isExpanded}>
         <div>
-          <img width="48" height="48" src={Logo} alt="Extension logo" />
+          <img
+            width="48"
+            height="48"
+            src={Logo}
+            alt="Extension logo"
+            draggable="false" />
         </div>
         {#if isHovered && !isExpanded}
           <div class="dots-container">
@@ -318,7 +322,7 @@
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
+            stroke-width="3"
             d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -460,3 +464,4 @@
     border-radius: 8px 0 0 8px;
   }
 </style>
+

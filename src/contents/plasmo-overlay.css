@@ -4,13 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --text: #000000;
-  }
-  [data-theme="dark"] {
-    --text: #e2e8f0;
-  }
+:host {
+  --text: #000000;
+}
+
+[data-theme="dark"] {
+  --text: #e2e8f0;
 }
 
 body {
