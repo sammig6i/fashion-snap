@@ -91,6 +91,7 @@ async function sendImagesToBackground() {
           newImages.forEach((img) => processedImages.add(img))
           console.log(`Filtered Images Updated: ${response.filteredImages}`)
         }
+        // TODO - Stop the clearing of images when rendered to ImageDisplay component --> storage.ts, background/sendImagesToServer.ts, updateImages.ts
       } catch (err) {
         console.error(`Error sending images to bckground: ${err}`)
       }

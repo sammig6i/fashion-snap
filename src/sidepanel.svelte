@@ -3,7 +3,7 @@
 
   import { onMount } from "svelte"
 
-  import { filteredImages } from "~/background/storage"
+  import { filteredImages, storage } from "~/background/storage"
   import ImageUploader from "~/lib/components/ImageUploader.svelte"
   import ImageDisplay from "~lib/components/ImageDisplay.svelte"
   import ThemeSwitcher from "~lib/components/ThemeSwitcher.svelte"
@@ -11,13 +11,19 @@
   let theme: "light" | "dark" = "light"
   let container: HTMLDivElement
 
-  onMount(() => {
+  onMount(async () => {
     const savedTheme = localStorage.getItem("popupTheme") as
       | "light"
       | "dark"
       | null
     theme = savedTheme || "light"
     applyTheme(theme)
+
+    // Rehydrate images from storage
+    const storedImages = await storage.get("filteredImages")
+    if (Array.isArray(storedImages)) {
+      filteredImages.set(storedImages)
+    }
   })
 
   function handleThemeChange(newTheme: "light" | "dark") {

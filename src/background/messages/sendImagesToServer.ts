@@ -26,7 +26,6 @@ const handler: PlasmoMessaging.MessageHandler<{ images: string[] }> = async (
     const data = await response.json()
 
     await storage.set("filteredImages", data.filteredImages)
-    // TODO - update UI to display the filtered images that are sent from model
 
     console.log("Filtered images:", data.filteredImages)
     res.send({ filteredImages: data.filteredImages })

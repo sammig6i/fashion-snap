@@ -5,12 +5,11 @@ import { Storage } from "@plasmohq/storage"
 const storage = new Storage()
 export const filteredImages = writable<string[]>([])
 
-// Initialize store with current storage value
-storage.get("filteredImages").then((value) => {
-  filteredImages.set(Array.isArray(value) ? value : [])
-})
+async function initializeStore() {
+  const storedImages = await storage.get("filteredImages")
+  filteredImages.set(Array.isArray(storedImages) ? storedImages : [])
+}
 
-// Watch for storage changes
 storage.watch({
   filteredImages: (newValue) => {
     if (Array.isArray(newValue)) {
@@ -21,9 +20,6 @@ storage.watch({
   }
 })
 
-export async function updateFilteredImages(images: string[]) {
-  await storage.set("filteredImages", images)
-  filteredImages.set(images)
-}
+initializeStore()
 
 export { storage }
